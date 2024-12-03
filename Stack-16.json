@@ -1,252 +1,273 @@
 {
-	"AWSTemplateFormatVersion": "2010-09-09",
-	"Parameters": {
-		"KeyName": {
-		  "Description": "LAB16",
-		  "Type": "AWS::EC2::KeyPair::KeyName",
-		  "ConstraintDescription": "Proporcione el nombre de un par de llaves SSH existente"
-		}
-	},
-	"Resources": {
-	  "VPCChavez": {
-		"Type": "AWS::EC2::VPC",
-		"Properties": {
-		  "CidrBlock": "192.168.0.0/24",
-		  "EnableDnsSupport": true,
-		  "EnableDnsHostnames": true,
-		  "Tags": [
-			{
-			  "Key": "Name",
-			  "Value": "VPC-Chavez"
-			}
-		  ]
-		}
-	  },
-	  "PublicSubnetChavez": {
-		"Type": "AWS::EC2::Subnet",
-		"Properties": {
-		  "VpcId": {
-			"Ref": "VPCChavez"
-		  },
-		  "CidrBlock": "192.168.0.0/26",
-		  "MapPublicIpOnLaunch": true,
-		  "AvailabilityZone": {
-			"Fn::Select": [
-			  0,
-			  {
-				"Fn::GetAZs": ""
-			  }
-			]
-		  },  
-		  "Tags": [
-			{
-			  "Key": "Name",
-			  "Value": "PublicSubnet-Chavez"
-			}
-		  ]
-		}
-	  },
-	  "InternetGatewayChavez": {
-		"Type": "AWS::EC2::InternetGateway",
-		"Properties": {
-		  "Tags": [
-			{
-			  "Key": "Name",
-			  "Value": "InternetGateway-Chavez"
-			}
-		  ]
-		}
-	  },
-	  "AttachGatewayChavez": {
-		"Type": "AWS::EC2::VPCGatewayAttachment",
-		"Properties": {
-		  "VpcId": {
-			"Ref": "VPCChavez"
-		  },
-		  "InternetGatewayId": {
-			"Ref": "InternetGatewayChavez"
-		  }
-		}
-	  },
-	  "PublicRouteTableChavez": {
-		"Type": "AWS::EC2::RouteTable",
-		"Properties": {
-		  "VpcId": {
-			"Ref": "VPCChavez"
-		  },
-		  "Tags": [
-			{
-			  "Key": "Name",
-			  "Value": "PublicRouteTable-Chavez"
-			}
-		  ]
-		}
-	  },
-	  "PublicRouteChavez": {
-		"Type": "AWS::EC2::Route",
-		"Properties": {
-		  "RouteTableId": {
-			"Ref": "PublicRouteTableChavez"
-		  },
-		  "DestinationCidrBlock": "0.0.0.0/0",
-		  "GatewayId": {
-			"Ref": "InternetGatewayChavez"
-		  }
-		}
-	  },
-	  "RouteTableAssociationPublicChavez": {
-		"Type": "AWS::EC2::SubnetRouteTableAssociation",
-		"Properties": {
-		  "SubnetId": {
-			"Ref": "PublicSubnetChavez"
-		  },
-		  "RouteTableId": {
-			"Ref": "PublicRouteTableChavez"
-		  }
-		}
-	  },
-	  "AsesoresTISecurityGroupChavez": {
-		"Type": "AWS::EC2::SecurityGroup",
-		"Properties": {
-		  "GroupDescription": "Allow HTTP, HTTPS, and SSH traffic",
-		  "VpcId": {
-			"Ref": "VPCChavez"
-		  },
-		  "SecurityGroupIngress": [
-			{
-			  "IpProtocol": "tcp",
-			  "FromPort": 22,
-			  "ToPort": 22,
-			  "CidrIp": "0.0.0.0/0"
-			},
-			{
-			  "IpProtocol": "tcp",
-			  "FromPort": 80,
-			  "ToPort": 80,
-			  "CidrIp": "0.0.0.0/0"
-			},
-			{
-			  "IpProtocol": "tcp",
-			  "FromPort": 443,
-			  "ToPort": 443,
-			  "CidrIp": "0.0.0.0/0"
-			}
-		  ]
-		}
-	  },
-	  "RDSSecurityGroupChavez": {
-		"Type": "AWS::EC2::SecurityGroup",
-		"Properties": {
-		  "GroupDescription": "Allow access to RDS from the web server",
-		  "VpcId": {
-			"Ref": "VPCChavez"
-		  },
-		  "SecurityGroupIngress": [
-			{
-			  "IpProtocol": "tcp",
-			  "FromPort": 3306,
-			  "ToPort": 3306,
-			  "SourceSecurityGroupId": {
-				"Ref": "AsesoresTISecurityGroupChavez"
-			  }
-			}
-		  ]
-		}
-	  },
-	  "AsesoresTIChavez": {
-		"Type": "AWS::EC2::Instance",
-		"Properties": {
-		  "InstanceType": "t2.micro",
-		  "KeyName": {
-          "Ref": "KeyName"  
+  "AWSTemplateFormatVersion": "2010-09-09",
+  "Parameters": {
+    "KeyName": {
+      "Description": "LAB16",
+      "Type": "AWS::EC2::KeyPair::KeyName",
+      "ConstraintDescription": "Proporcione el nombre de un par de llaves SSH existente"
+    }
+  },
+  "Resources": {
+    "VPCChavez": {
+      "Type": "AWS::EC2::VPC",
+      "Properties": {
+        "CidrBlock": "192.168.0.0/24",
+        "EnableDnsSupport": true,
+        "EnableDnsHostnames": true,
+        "Tags": [
+          {
+            "Key": "Name",
+            "Value": "VPC-Chavez"
+          }
+        ]
+      }
+    },
+    "PublicSubnetChavez": {
+      "Type": "AWS::EC2::Subnet",
+      "Properties": {
+        "VpcId": {
+          "Ref": "VPCChavez"
+        },
+        "CidrBlock": "192.168.0.0/26",
+        "MapPublicIpOnLaunch": true,
+        "AvailabilityZone": {
+          "Fn::Select": [
+            0,
+            {
+              "Fn::GetAZs": ""
+            }
+          ]
+        },
+        "Tags": [
+          {
+            "Key": "Name",
+            "Value": "PublicSubnet-Chavez"
+          }
+        ]
+      }
+    },
+    "PrivateSubnetChavez": {
+      "Type": "AWS::EC2::Subnet",
+      "Properties": {
+        "VpcId": {
+          "Ref": "VPCChavez"
+        },
+        "CidrBlock": "192.168.1.0/26",
+        "AvailabilityZone": {
+          "Fn::Select": [
+            0,
+            {
+              "Fn::GetAZs": ""
+            }
+          ]
+        },
+        "Tags": [
+          {
+            "Key": "Name",
+            "Value": "PrivateSubnet-Chavez"
+          }
+        ]
+      }
+    },
+    "InternetGatewayChavez": {
+      "Type": "AWS::EC2::InternetGateway",
+      "Properties": {
+        "Tags": [
+          {
+            "Key": "Name",
+            "Value": "InternetGateway-Chavez"
+          }
+        ]
+      }
+    },
+    "AttachGatewayChavez": {
+      "Type": "AWS::EC2::VPCGatewayAttachment",
+      "Properties": {
+        "VpcId": {
+          "Ref": "VPCChavez"
+        },
+        "InternetGatewayId": {
+          "Ref": "InternetGatewayChavez"
+        }
+      }
+    },
+    "PublicRouteTableChavez": {
+      "Type": "AWS::EC2::RouteTable",
+      "Properties": {
+        "VpcId": {
+          "Ref": "VPCChavez"
+        },
+        "Tags": [
+          {
+            "Key": "Name",
+            "Value": "PublicRouteTable-Chavez"
+          }
+        ]
+      }
+    },
+    "PublicRouteChavez": {
+      "Type": "AWS::EC2::Route",
+      "Properties": {
+        "RouteTableId": {
+          "Ref": "PublicRouteTableChavez"
+        },
+        "DestinationCidrBlock": "0.0.0.0/0",
+        "GatewayId": {
+          "Ref": "InternetGatewayChavez"
+        }
+      }
+    },
+    "RouteTableAssociationPublicChavez": {
+      "Type": "AWS::EC2::SubnetRouteTableAssociation",
+      "Properties": {
+        "SubnetId": {
+          "Ref": "PublicSubnetChavez"
+        },
+        "RouteTableId": {
+          "Ref": "PublicRouteTableChavez"
+        }
+      }
+    },
+    "AsesoresTISecurityGroupChavez": {
+      "Type": "AWS::EC2::SecurityGroup",
+      "Properties": {
+        "GroupDescription": "Allow HTTP, HTTPS, and SSH traffic",
+        "VpcId": {
+          "Ref": "VPCChavez"
+        },
+        "SecurityGroupIngress": [
+          {
+            "IpProtocol": "tcp",
+            "FromPort": 22,
+            "ToPort": 22,
+            "CidrIp": "0.0.0.0/0"
           },
-		  "SecurityGroupIds": [
-			{
-			  "Ref": "AsesoresTISecurityGroupChavez"
-			}
-		  ],
-		  "SubnetId": {
-			"Ref": "PublicSubnetChavez"
-		  },
-		  "ImageId": "ami-0866a3c8686eaeeba",
-		  "Tags": [
-			{
-			  "Key": "Name",
-			  "Value": "AsesoresTI-Chavez"
-			}
-		  ]
-		}
-	  },
-	  "RDSInstanceChavez": {
-			"Type": "AWS::RDS::DBInstance",
-			"Properties": {
-			"DBInstanceClass": "db.t2.micro",
-			"Engine": "mysql",
-			"AllocatedStorage": "20",
-			"MasterUsername": "admin",
-			"MasterUserPassword": "password",
-			"DBName": "AsesoresTIDB",
-			"DBSubnetGroupName": {
-				"Ref": "MyDBSubnetGroup"  
-			},
-			"VPCSecurityGroups": [
-				{
-				"Ref": "RDSInstanceSecurityGroupChavez"
-				}
-			]
-			}
-		},
-		"MyDBSubnetGroup": {
-		"Type": "AWS::RDS::DBSubnetGroup",
-		"Properties": {
-			"DBSubnetGroupDescription": "Subredes públicas para la instancia de RDS",
-			"SubnetIds": [
-			{
-				"Ref": "PublicSubnetChavez"  
-			}
-			]
-		}
-		},
-	  "S3BucketChavez": {
-		"Type": "AWS::S3::Bucket",
-		"Properties": {
-			"BucketName": "asesoresti-chavez",
-			"AccessControl": "Private", 
-			"Tags": [
-			{
-				"Key": "Name",
-				"Value": "S3Bucket-Chavez"
-			}
-			]
-		}
-	   }	
-
-	},
-	"Outputs": {
-	  "WebServerPublicIP": {
-		"Description": "Public IP of the web server",
-		"Value": {
-		  "Fn::GetAtt": [
-			"AsesoresTIChavez",
-			"PublicIp"
-		  ]
-		}
-	  },
-	  "RDSInstanceEndpoint": {
-		"Description": "RDS Endpoint",
-		"Value": {
-		  "Fn::GetAtt": [
-			"RDSInstanceChavez",
-			"Endpoint.Address"
-		  ]
-		}
-	  },
-	  "S3BucketName": {
-		"Description": "S3 Bucket Name",
-		"Value": {
-		  "Ref": "S3BucketChavez"
-		}
-	  }
-	}
+          {
+            "IpProtocol": "tcp",
+            "FromPort": 80,
+            "ToPort": 80,
+            "CidrIp": "0.0.0.0/0"
+          },
+          {
+            "IpProtocol": "tcp",
+            "FromPort": 443,
+            "ToPort": 443,
+            "CidrIp": "0.0.0.0/0"
+          }
+        ]
+      }
+    },
+    "RDSSecurityGroupChavez": {
+      "Type": "AWS::EC2::SecurityGroup",
+      "Properties": {
+        "GroupDescription": "Allow access to RDS from the web server",
+        "VpcId": {
+          "Ref": "VPCChavez"
+        },
+        "SecurityGroupIngress": [
+          {
+            "IpProtocol": "tcp",
+            "FromPort": 3306,
+            "ToPort": 3306,
+            "SourceSecurityGroupId": {
+              "Ref": "AsesoresTISecurityGroupChavez"
+            }
+          }
+        ]
+      }
+    },
+    "AsesoresTIChavez": {
+      "Type": "AWS::EC2::Instance",
+      "Properties": {
+        "InstanceType": "t2.micro",
+        "KeyName": {
+          "Ref": "KeyName"
+        },
+        "SecurityGroupIds": [
+          {
+            "Ref": "AsesoresTISecurityGroupChavez"
+          }
+        ],
+        "SubnetId": {
+          "Ref": "PublicSubnetChavez"
+        },
+        "ImageId": "ami-0866a3c8686eaeeba",
+        "Tags": [
+          {
+            "Key": "Name",
+            "Value": "AsesoresTI-Chavez"
+          }
+        ]
+      }
+    },
+    "MyDBSubnetGroup": {
+      "Type": "AWS::RDS::DBSubnetGroup",
+      "Properties": {
+        "DBSubnetGroupDescription": "Subredes privadas para la instancia de RDS",
+        "SubnetIds": [
+          {
+            "Ref": "PrivateSubnetChavez"
+          }
+        ]
+      }
+    },
+    "RDSInstanceChavez": {
+      "Type": "AWS::RDS::DBInstance",
+      "Properties": {
+        "DBInstanceClass": "db.t2.micro",
+        "Engine": "mysql",
+        "AllocatedStorage": "20",
+        "MasterUsername": "admin",
+        "MasterUserPassword": "password",
+        "DBName": "AsesoresTIDB",
+        "DBSubnetGroupName": {
+          "Ref": "MyDBSubnetGroup"
+        },
+        "VPCSecurityGroups": [
+          {
+            "Ref": "RDSSecurityGroupChavez"
+          }
+        ]
+      }
+    },
+    "S3BucketChavez": {
+      "Type": "AWS::S3::Bucket",
+      "Properties": {
+        "BucketName": "asesoresti-chavez",
+        "AccessControl": "Private",
+        "Tags": [
+          {
+            "Key": "Name",
+            "Value": "S3Bucket-Chavez"
+          }
+        ]
+      }
+    }
+  },
+  "Outputs": {
+    "WebServerPublicIP": {
+      "Description": "Public IP of the web server",
+      "Value": {
+        "Fn::GetAtt": [
+          "AsesoresTIChavez",
+          "PublicIp"
+        ]
+      }
+    },
+    "RDSInstanceEndpoint": {
+      "Description": "RDS Endpoint",
+      "Value": {
+        "Fn::GetAtt": [
+          "RDSInstanceChavez",
+          "Endpoint.Address"
+        ]
+      }
+    },
+    "S3BucketName": {
+      "Description": "S3 Bucket Name",
+      "Value": {
+        "Ref": "S3BucketChavez"
+      }
+    }
   }
-  
+}
